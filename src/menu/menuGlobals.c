@@ -56,17 +56,14 @@ gui_object_t menu_main_view_group;
 struct repeating_timer menu_vsync_hsync_timer;
 
 uint spinbox_vertical, spinbox_horizontal, spinbox_pix_width;
-uint gain_offset_slider_option;
-uint spinbox_gain_offset_unified, spinbox_gain_offset_red, spinbox_gain_offset_green, spinbox_gain_offset_blue, spinbox_display_no;
+uint spinbox_display_no;
 uint spinbox_fine_tune;
 uint color_slider_option, color_spinbox_red, color_spinbox_green, color_spinbox_blue, *color_slider_selected;
 const char* menu_about_scroll_str;
-const char* menu_about_str = "pico-rgb2hdmi is a micro-\ncontrolled RGB to HDMI\nand RGB to USB converter\nbased on a raspberry pi\npico and a cheap Analog\nFront End (AFE) aimed to\nsupport 80s and 90s comp-\nuters with the precursor\nof the VGA.\n\nSupporter list:\nFernando Bugallo\nEspacio Tec:\n Jose Francisco Manera\n Sebastian Rho\n Juan Pablo Chucair\nGabriel Garcia\nAlejandro Perez\nGaston Martin Ferreiros\nOtto\nAldo Ibanez\nEmiliano Escobar\nFrancisco Maqueira\nJose Gumersindo\nRetro computacion:\n Jorge Castillo\nLeandro Galvano\nErnesto Uriburu\nCarlos Masciarelli\nMarcelo Barbalace\nCarlos Aon\nPCB Design:\n Camilo Gomez\nFirmware and HW Design:\n Marcelo Lorenzati\nArgentina-Cordoba-2022";
+const char* menu_about_str = "pico-rgb2hdmi is a micro-\ncontrolled RGB to HDMI\nand RGB to USB converter\nbased on a raspberry pi\npico with digital RGB in-\nput aimed to support 80s\nand 90s computers with\nthe precursor of the\nVGA.\n\nSupporter list:\nFernando Bugallo\nEspacio Tec:\n Jose Francisco Manera\n Sebastian Rho\n Juan Pablo Chucair\nGabriel Garcia\nAlejandro Perez\nGaston Martin Ferreiros\nOtto\nAldo Ibanez\nEmiliano Escobar\nFrancisco Maqueira\nJose Gumersindo\nRetro computacion:\n Jorge Castillo\nLeandro Galvano\nErnesto Uriburu\nCarlos Masciarelli\nMarcelo Barbalace\nCarlos Aon\nPCB Design:\n Camilo Gomez\nFirmware and HW Design:\n Marcelo Lorenzati\nArgentina-Cordoba-2022";
 bool menu_usb_enabled = false;
 bool menu_display_confirmation=false;
 display_t *menu_current_display;
 uint color_black, color_white;
-const char *menu_gain_offset_rgb_str[MENU_GAIN_OFFSET_OPTS] = { "", "", "", "RGB gain", "RGB offset"};
-const char *menu_gain_offset_unified_str[MENU_GAIN_OFFSET_OPTS] = { "Unified gain", "Unified offset", "Negative offset", "", ""};
 
 // --------- Global register end --------- 
