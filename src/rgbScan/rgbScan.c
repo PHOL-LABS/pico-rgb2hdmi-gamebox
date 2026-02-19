@@ -35,7 +35,7 @@ static inline void rgb_scanner_gpio_acknowledge_irq(uint gpio, uint32_t events) 
 }
 
 static void __not_in_flash_func(rgb_scanner_gpio_irq_handler)(void) {
-    io_irq_ctrl_hw_t *irq_ctrl_base = get_core_num() ? &iobank0_hw->proc1_irq_ctrl : &iobank0_hw->proc0_irq_ctrl;
+    io_bank0_irq_ctrl_hw_t *irq_ctrl_base = get_core_num() ? &iobank0_hw->proc1_irq_ctrl : &iobank0_hw->proc0_irq_ctrl;
 
     io_ro_32 *status_reg_hsync = &irq_ctrl_base->ints[_hsyncGPIO / 8];
     uint events_hsync = (*status_reg_hsync >> 4 * (_hsyncGPIO % 8)) & 0xf;
