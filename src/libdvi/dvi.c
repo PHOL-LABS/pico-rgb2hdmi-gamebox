@@ -231,7 +231,7 @@ static void __dvi_func(dvi_dma_irq_handler)(struct dvi_inst *inst) {
     // Make sure all three channels have definitely loaded their last block
     // (should be within a few cycles of one another)
     for (int i = 0; i < N_TMDS_LANES; ++i) {
-        while (dma_debug_hw->ch[inst->dma_cfg[i].chan_data].tcr != inst->words_per_channel)
+        while (dma_debug_hw->ch[inst->dma_cfg[i].chan_data].dbg_tcr != inst->words_per_channel)
             tight_loop_contents();
     }
 
