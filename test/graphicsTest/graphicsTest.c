@@ -38,7 +38,7 @@ uint16_t *framebuf_16 = GET_RGB16_BUFFER(genbuf);
 // --------- Global register start ---------
 bool symbols_per_word = 0; //0: 1 symbol (640x240@8), 1: 2 symbols(320x240@16)
 struct dvi_inst dvi0;
-uint gpio_pins[3] = { KEYBOARD_PIN_UP, KEYBOARD_PIN_DOWN, KEYBOARD_PIN_ACTION };
+// uint gpio_pins[3] = { KEYBOARD_PIN_UP, KEYBOARD_PIN_DOWN, KEYBOARD_PIN_ACTION };
 const uint LED_PIN = PICO_DEFAULT_LED_PIN;
 bool blink = true;
 static uint hdmi_scanline = 2;
@@ -80,9 +80,9 @@ static inline void core1_scanline_callback() {
 	}
 }
 
-void on_keyboard_event(keyboard_status_t keys) {
-    printf("Keyboard event received \n");
-}
+// void on_keyboard_event(keyboard_status_t keys) {
+//     printf("Keyboard event received \n");
+// }
 
 int main() {
     uint color_red = symbols_per_word ? color_16_red : color_8_red;
@@ -103,8 +103,8 @@ int main() {
 	gpio_init(LED_PIN);
     gpio_set_dir(LED_PIN, GPIO_OUT);
 
-	printf("Initializing keyboard\n");
-	keyboard_initialize(gpio_pins, 3, KEYBOARD_REFRESH_RATE_MS, KEYBOARD_REPEAT_RATE_MS, on_keyboard_event);
+	// printf("Initializing keyboard\n");
+	// keyboard_initialize(gpio_pins, 3, KEYBOARD_REFRESH_RATE_MS, KEYBOARD_REPEAT_RATE_MS, on_keyboard_event);
 
 	printf("Configuring DVI\n");
 
