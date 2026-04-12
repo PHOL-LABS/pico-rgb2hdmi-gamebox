@@ -15,7 +15,7 @@ int command_info_afe_error;
 int command_info_scanner_error;
 
 ///////////   GLOBALS   ///////////
-bool command_license_is_valid;
+bool command_license_is_valid = true;
 const void *security_key_in_flash;
 
 #define COMMAND_GET_PRINTF_WORD() command_get_current_bppx() == rgb_16_565 ? "%04X%s" : "%02X%s"
@@ -30,12 +30,12 @@ bool command_is_license_valid() {
 }
 
 void command_validate_license(const uint8_t *security_key) {
-    #ifdef USE_LICENSE
-        int token = -1;
-	    command_license_is_valid = security_key_is_valid(security_key, token) <= 0;
-    #else
+    // #ifdef USE_LICENSE
+    //     int token = -1;
+	//     command_license_is_valid = security_key_is_valid(security_key, token) <= 0;
+    // #else
         command_license_is_valid = true;
-    #endif
+    // #endif
 }
 
 void command_reboot() {

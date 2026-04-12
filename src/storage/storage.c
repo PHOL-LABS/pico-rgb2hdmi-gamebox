@@ -9,6 +9,9 @@
 #include "hardware/sync.h"
 #include <string.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #define STORAGE_CMD_DUMMY_BYTES 1
 #define STORAGE_CMD_DATA_BYTES 3
 #define STORAGE_CMD_TOTAL_BYTES (STORAGE_CMD_DUMMY_BYTES + STORAGE_CMD_DATA_BYTES)
@@ -56,12 +59,14 @@ void storage_flash(uint32_t offset, size_t size, const void *settings) {
 
 int storage_initialize(const void *initial_settings, const void **updated_settings, size_t size, bool force) {
     // Size is +1 to host the canary byte
+    printf("Initializing storage\n");
     global_storage_copy_size = size + 1;
     global_storage_erase_size = get_size_in_blocks(global_storage_copy_size, FLASH_SECTOR_SIZE);
    
     uint32_t capacity = storage_get_flash_capacity();
     if (capacity == 0 || capacity >= (1<<30)) {
         // Stop if we get an erroneous capacity from the QSPI Flash
+        printf("Incorrect QPSI capacity\n");
         return 1;
     }
     
@@ -73,9 +78,10 @@ int storage_initialize(const void *initial_settings, const void **updated_settin
      // First byte is the canary, if unitialized requires to be flashed
     if (canary != 0 || force) {
         // Flash data
+        printf("Flashing initial settings\n");
         return storage_update(initial_settings) == 0 ? -1 : 2;
     }
-
+    printf("Storage update finished\n");
     return 0;
 }
 

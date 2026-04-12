@@ -162,6 +162,7 @@ void command_line_loop() {
 int main() {
     vreg_set_voltage(VREG_VSEL);
     sleep_ms(10);
+    stdio_init_all();
 
     // Run system at TMDS bit clock
     set_sys_clock_khz(DVI_TIMING.bit_clk_khz, true);
@@ -169,16 +170,20 @@ int main() {
         //system_delayed_write_disable();
     #endif
 
+    // Give time to open serial terminal after reset
+    sleep_ms(5000);
+    printf("Settings loading\n");
+
     // Validate license prior starting second core
     if (settings_initialize(&factory_settings) > 0) {
         printf("storage initialize failed \n");
     };
-    command_validate_license(settings_get()->security_key);
 
     // Configure scan video properties
     display_t *current_display = &(settings_get()->displays[settings_get()->flags.default_display]);
     set_video_props(current_display->v_front_porch, current_display->v_back_porch, current_display->h_front_porch, current_display->h_back_porch, settings_get()->flags.symbols_per_word ? FRAME_WIDTH_16_BITS : FRAME_WIDTH_8_BITS, FRAME_HEIGHT, current_display->refresh_rate, current_display->fine_tune, settings_get()->flags.symbols_per_word, genbuf);
     
+    printf("AFE init\n");
     // Do early init of config and update Gain & offset from stored settings
     wm8213_afe_init(&afec_cfg);
     wm8213_afe_capture_update_bppx(GET_VIDEO_PROPS().symbols_per_word ? rgb_16_565 : rgb_8_332, false);
@@ -194,9 +199,11 @@ int main() {
          printf("AFE initialize succeded \n");
     }
 
+    printf("Menu test\n");
     // Menu System Initialize
     menu_initialize(keyboard_gpio_pins, menu_event_map, KEYBOARD_N_PINS);
 
+    printf("DVI init\n");
     // Initialize DVI
     dvi0.timing = &DVI_TIMING;
     dvi0.ser_cfg = DVI_DEFAULT_SERIAL_CONFIG;
@@ -209,11 +216,13 @@ int main() {
     // Start the Core1, dedicated for DVI
     void *bufptr = NULL;
     
+    printf("DVI core init\n");
     queue_add_blocking_u32(&dvi0.q_colour_valid, &bufptr);
     bufptr += GET_VIDEO_PROPS().width;
     queue_add_blocking_u32(&dvi0.q_colour_valid, &bufptr);
     multicore_launch_core1(core1_main);
 
+    printf("rgbScanner init\n");
     // Initializing RGBSCAN and the leds to indicate it's activity
     sleep_ms(10);
     gpio_init(LED_PIN);
@@ -227,6 +236,7 @@ int main() {
         }
     }
 
+    printf("start image init\n");
     // Prepare first start image
     command_show_info(true);
 
@@ -236,12 +246,15 @@ int main() {
         printf("%d\n", i);
     }
 
+    printf("command show info init\n");
     // Remove info screen if license is valid
     command_show_info(!command_is_license_valid());
 
+    printf("Show version\n");
     // Show Version
     command_on_receive('v', NULL, false);
 
+    printf("Enter loop\n");
     // Main Busy Loop
     command_line_loop();
 

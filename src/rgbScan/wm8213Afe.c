@@ -106,6 +106,7 @@ uint wm8213_afe_capture_setup() {
     if (wm8213_afe_capture_global.config == NULL) {
         return 1;
     }
+    //Disables sampling PIO!!!
     pio_sm_set_enabled(wm8213_afe_capture_global.config->pio, wm8213_afe_capture_global.config->sm_afe, false);
     
     const pio_program_t *program = NULL;
@@ -204,12 +205,12 @@ int wm8213_afe_start(uint sampling_rate)
     }
 
     const wm8213_afe_config_t *config = wm8213_afe_capture_global.config;
-    int res = wm8213_afe_spi_setup(config, &wm8213_afe_capture_global.setups);
-    if (res > 0) { return res; }
+    // int res = wm8213_afe_spi_setup(config, &wm8213_afe_capture_global.setups);
+    // if (res > 0) { return res; }
 
     wm8213_afe_capture_global.sampling_rate = sampling_rate;
 
-    res = wm8213_afe_capture_setup();
+    int res = wm8213_afe_capture_setup();
     if (res > 0) { return res; }
 
     afe_dma_prepare(config->pio, config->sm_afe);
