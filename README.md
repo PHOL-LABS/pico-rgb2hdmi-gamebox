@@ -64,6 +64,31 @@ python3 csv2png.py image.csv
 ```
 This generates as output image.png
 
+
+## Capturing frames directly to binary
+Use this when you want to automate serial capture and avoid CSV files.
+
+```
+python3 tools/capture_to_frame.py --port /dev/ttyACM0 --output frame.rgbf
+```
+
+Defaults:
+- command payload: `capture 0\r\n`
+- baud rate: `115200`
+- output format: RGBF (`.rgbf`) with width/height/pixel-format metadata + CRC32
+
+Convert the captured frame into PNG:
+
+```
+python3 tools/frame_to_png.py frame.rgbf --output frame.png
+```
+
+If you already have raw payload bytes (no header), use raw mode:
+
+```
+python3 tools/frame_to_png.py frame.raw --raw --width 640 --height 240 --pixfmt rgb332 --output frame.png
+```
+
 ## Using packtiles to generate include headers from images
 
 ./packtiles -s -f r1 char_c64_lineal.png font_c64.h
