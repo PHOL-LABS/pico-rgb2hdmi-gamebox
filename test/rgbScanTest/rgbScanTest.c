@@ -28,16 +28,27 @@ void signalCallback(rgbscan_signal_event_type type) {
 
 int main() {
     vreg_set_voltage(VREG_VOLTAGE_1_20);
-	sleep_ms(10);
-	set_sys_clock_khz(250000, true);
+    sleep_ms(10);
+    set_sys_clock_khz(250000, true);
 
     stdio_init_all();
 
     gpio_init(LED_PIN);
     gpio_set_dir(LED_PIN, GPIO_OUT);
-    int error;
-    if (error = rgbScannerSetup(RGB_SCAN_VSYNC_PIN, RGB_SCAN_HSYNC_PIN, frontPorch, height, &scanLineTriggered, signalCallback, &noSignaltestData) > 0) {
-        printf("rgbScannerSetup failed with code %d\n", error);
+
+    int error = rgbScannerSetup(
+        RGB_SCAN_VSYNC_PIN,
+        RGB_SCAN_HSYNC_PIN,
+        frontPorch,
+        height,
+        &scanLineTriggered,
+        signalCallback,
+        &noSignaltestData);
+    if (error > 0) {
+        while (true) {
+            printf("rgbScannerSetup failed with code %d\n", error);
+            sleep_ms(1000);
+        }
     }
 
     printf("%s version - RGB Scan Test %s started!\n", PROJECT_NAME, PROJECT_VER);
