@@ -21,6 +21,7 @@ unsigned int  tickCsyncPulse, hsyncRstValue;
 bool          isHsyncLine, isVsync;
 signed int    syncTypeCnt = RGB_SCANNER_SYNC_TYPE_TRIG;
 int           shutdownCnt = 0;
+bool          rgbScannerCompositeSync = false;
 
 scanlineCallback rgbScannerScanlineCallback = NULL;
 volatile unsigned int     rgbScannerScanlineTriggerFrontPorch = 0;   
@@ -62,14 +63,16 @@ static void __not_in_flash_func(rgb_scanner_gpio_irq_handler)(void) {
         }
     }
     
-    io_ro_32 *status_reg_vsync = &irq_ctrl_base->ints[_vsyncGPIO / 8];
-    uint events_vsync = (*status_reg_vsync >> 4 * (_vsyncGPIO % 8)) & 0xf;
-    if (events_vsync) {
-        rgb_scanner_gpio_acknowledge_irq(_vsyncGPIO, events_vsync);
-        isVsync = true;
-        hsyncRstValue = 0;
-        if (syncTypeCnt > -RGB_SCANNER_SYNC_TYPE_CNT) {
-            syncTypeCnt--;
+    if (!rgbScannerCompositeSync) {
+        io_ro_32 *status_reg_vsync = &irq_ctrl_base->ints[_vsyncGPIO / 8];
+        uint events_vsync = (*status_reg_vsync >> 4 * (_vsyncGPIO % 8)) & 0xf;
+        if (events_vsync) {
+            rgb_scanner_gpio_acknowledge_irq(_vsyncGPIO, events_vsync);
+            isVsync = true;
+            hsyncRstValue = 0;
+            if (syncTypeCnt > -RGB_SCANNER_SYNC_TYPE_CNT) {
+                syncTypeCnt--;
+            }
         }
     }
 
@@ -129,12 +132,15 @@ int rgbScannerSetup(uint vsyncGPIO, uint hsyncGPIO, uint frontPorch, uint height
     rgbScannerUpdateData(frontPorch, height);
     _vsyncGPIO = vsyncGPIO;
     _hsyncGPIO = hsyncGPIO;
+    rgbScannerCompositeSync = vsyncGPIO == hsyncGPIO;
     gpio_init(_vsyncGPIO);
     gpio_set_dir(_vsyncGPIO, GPIO_IN);
     gpio_pull_up(_vsyncGPIO);
-    gpio_init(hsyncGPIO);
-    gpio_set_dir(hsyncGPIO, GPIO_IN);
-    gpio_pull_up(hsyncGPIO);
+    if (!rgbScannerCompositeSync) {
+        gpio_init(hsyncGPIO);
+        gpio_set_dir(hsyncGPIO, GPIO_IN);
+        gpio_pull_up(hsyncGPIO);
+    }
 
     rgbScannerEnable(true);
     irq_set_exclusive_handler(IO_IRQ_BANK0, rgb_scanner_gpio_irq_handler);
@@ -166,7 +172,9 @@ unsigned int rgbScannerGetHsyncNanoSec() {
 
 static bool rgbScannerEnabled = false;
 void rgbScannerEnable(bool value) {
-    gpio_set_irq_enabled(_vsyncGPIO,  GPIO_IRQ_EDGE_FALL, value);
+    if (!rgbScannerCompositeSync) {
+        gpio_set_irq_enabled(_vsyncGPIO,  GPIO_IRQ_EDGE_FALL, value);
+    }
     gpio_set_irq_enabled(_hsyncGPIO,  GPIO_IRQ_EDGE_RISE, value);
     gpio_set_irq_enabled(_hsyncGPIO,  GPIO_IRQ_EDGE_FALL, value);
     rgbScannerEnabled = value;

@@ -18,9 +18,20 @@
 
 //SYNC edge triggered Pins
 #ifdef _RGB_SCANNER_H
-    #define RGB_SCAN_VSYNC_PIN  26
+    #define RGB_SCAN_VSYNC_PIN  27
     #define RGB_SCAN_HSYNC_PIN  27
 #endif
+
+//Digital RGB input pins (3-3-2)
+#define RGB_INPUT_RED_0_PIN   11
+#define RGB_INPUT_RED_1_PIN   12
+#define RGB_INPUT_RED_2_PIN   13
+#define RGB_INPUT_GREEN_0_PIN 14
+#define RGB_INPUT_GREEN_1_PIN 15
+#define RGB_INPUT_GREEN_2_PIN 16
+#define RGB_INPUT_BLUE_0_PIN  17
+#define RGB_INPUT_BLUE_1_PIN  18
+// Pins 19-22, 26, 28 are not connected.
 
 //VIDEO Timing
 #define V_FRONT_PORCH            42
@@ -30,108 +41,10 @@
 #define HSYNC_BACK_PORCH         50
 #define DEFAULT_SYMBOLS_PER_WORD 1
 
-//AFE (Analog Front End) Specific Config
-#ifdef _WM8213_AFE_H
-    //AFE SPI Pins
-    #define AFE_SDO  16
-    #define AFE_CS   17
-    #define AFE_SCK  18
-    #define AFE_SDI  19
-
-    //AFE Paralel port pins
-    #define AFE_OP        11 //Takes 6 pins starting from the beforementioned number
-    #define AFE_VSMP    20 //Video Sample timing pulse
-    #define AFE_RSMP    21 //Reset sample timing pulse
-    #define AFE_MCLK    22 //Master ADC Clock
-
-    //VSMP ___________________|‾|___________________________|‾|____________
-    //RSMP ____|‾|___________________________|‾|___________________________
-    //MCLK ____|‾‾‾‾|____|‾‾‾‾|____|‾‾‾‾|____|‾‾‾‾|____|‾‾‾‾|____|‾‾‾‾|____
-    //OP   ===>.<===R===>.<===G===>.<===B===>.<===R===>.<===G===>.<===B===>
-
-    #define AFE_PGA_GAIN_RGB          61
-    #define AFE_PGA_GAIN_RGB_SOG      75
-    #define AFE_RLC_DAC_NEG           1
-	#define AFE_OFFSET_DAC            0
-	#define AFE_OFFSET_DAC_SOG_RED    230
-    #define AFE_OFFSET_DAC_SOG_GREEN  230/6
-	#define AFE_OFFSET_DAC_SOG_BLUE   230
-
-    static const wm8213_afe_config_t afec_cfg = {
-        .spi = spi0,
-        .baudrate = 1 * MHZ,
-        .pins_spi = {AFE_SCK, AFE_SDI, AFE_SDO, AFE_CS},
-        .setups = {
-            .setup1 = {
-                .enable = 1,
-                .cds= 0,
-                .mono = 0,
-                .two_chan = 0,
-                .pgafs = 3,
-                .mode_4_legacy = 0,
-                .legacy = 0
-            },
-            .setup2 = {
-                .opp_form = 1,
-                .invop = 0,
-                .opd = 0,
-                .low_refs = 0,
-                .rlc_dac_rng = 0,
-                .del = 0
-            },
-            .setup3 = {
-                .rlc_dac = AFE_RLC_DAC_NEG,
-                .cds_ref = 0,
-                .chan = 0
-            },
-            .setup4 = {
-                .line_by_line = 0,
-                .acyc =  0,
-                .intm = 0
-            },
-            .setup5 = {
-                .red_pd = 0,
-                .green_pd = 0,
-                .blue_pd = 0,
-                .adc_pd = 0,
-                .vrlc_dac_pd = 0,
-                .vrx_pd = 0
-            },
-            .setup6 = {
-                .vsm_pdet = 0,
-                .vdel = 0,
-                .posn_neg = 0,
-                .rlc_en = 0,
-                .clamp_ctrl = 0
-            },
-            // .offset_dac = {
-            //     .red = AFE_OFFSET_DAC,
-			// 	.green = AFE_OFFSET_DAC,         // Common config
-			// 	//.green = (1 * AFE_OFFSET_DAC) / 5, // SOG config
-            //     .blue = AFE_OFFSET_DAC
-            // },
-            // .pga_gain = {
-            //     .red = {
-            //         .lsb =  AFE_PGA_GAIN_RGB & 0x01,
-            //         .msb = (AFE_PGA_GAIN_RGB >> 1) & 0xFF
-            //     },
-            //     .green = {
-            //         .lsb =  AFE_PGA_GAIN_RGB & 0x01,
-            //         .msb = (AFE_PGA_GAIN_RGB >> 1) & 0xFF
-            //     },
-            //     .blue = {
-            //         .lsb =  AFE_PGA_GAIN_RGB & 0x01,
-            //         .msb = (AFE_PGA_GAIN_RGB >> 1) & 0xFF
-            //     }
-            // }
-        },
-        .verify_retries = 3,
-        .pio = pio1,
-        .sm_afe = 0,
-        .pin_base_afe_op = AFE_OP,
-        .pin_base_afe_ctrl = AFE_VSMP
-    };
-#endif
+//Digital input defaults
+#define DIGITAL_GAIN_DEFAULT       0
+#define DIGITAL_OFFSET_DEFAULT     0
+#define DIGITAL_NEG_OFFSET_DEFAULT 0
 
 //DVI Specific configs
 #ifdef _DVI_SERIALISER_H
@@ -189,29 +102,29 @@
             .flags.scan_line = 0, \
             .flags.symbols_per_word = DEFAULT_SYMBOLS_PER_WORD == 2, \
             .displays = {{ \
-                    .gain = { .red = AFE_PGA_GAIN_RGB, .green = AFE_PGA_GAIN_RGB, .blue = AFE_PGA_GAIN_RGB}, \
-                    .offset = { .red = AFE_OFFSET_DAC, .green = AFE_OFFSET_DAC,   .blue = AFE_OFFSET_DAC, .negative = AFE_RLC_DAC_NEG}, \
+                    .gain = { .red = DIGITAL_GAIN_DEFAULT, .green = DIGITAL_GAIN_DEFAULT, .blue = DIGITAL_GAIN_DEFAULT}, \
+                    .offset = { .red = DIGITAL_OFFSET_DEFAULT, .green = DIGITAL_OFFSET_DEFAULT,   .blue = DIGITAL_OFFSET_DEFAULT, .negative = DIGITAL_NEG_OFFSET_DEFAULT}, \
                     .v_front_porch = V_FRONT_PORCH, .v_back_porch = V_BACK_PORCH, \
                     .h_front_porch = HSYNC_FRONT_PORCH, .h_back_porch = HSYNC_BACK_PORCH, \
                     .refresh_rate = REFRESH_RATE, \
                     .fine_tune = 0 \
                 }, { \
-                    .gain = { .red = AFE_PGA_GAIN_RGB, .green = AFE_PGA_GAIN_RGB, .blue = AFE_PGA_GAIN_RGB}, \
-                    .offset = { .red = AFE_OFFSET_DAC, .green = AFE_OFFSET_DAC,   .blue = AFE_OFFSET_DAC, .negative = AFE_RLC_DAC_NEG }, \
+                    .gain = { .red = DIGITAL_GAIN_DEFAULT, .green = DIGITAL_GAIN_DEFAULT, .blue = DIGITAL_GAIN_DEFAULT}, \
+                    .offset = { .red = DIGITAL_OFFSET_DEFAULT, .green = DIGITAL_OFFSET_DEFAULT,   .blue = DIGITAL_OFFSET_DEFAULT, .negative = DIGITAL_NEG_OFFSET_DEFAULT }, \
                     .v_front_porch = V_FRONT_PORCH, .v_back_porch = V_BACK_PORCH, \
                     .h_front_porch = HSYNC_FRONT_PORCH, .h_back_porch = HSYNC_BACK_PORCH, \
                     .refresh_rate = REFRESH_RATE, \
                     .fine_tune = 0 \
                 }, { \
-                    .gain = { .red = AFE_PGA_GAIN_RGB, .green = AFE_PGA_GAIN_RGB, .blue = AFE_PGA_GAIN_RGB}, \
-                    .offset = { .red = AFE_OFFSET_DAC, .green = AFE_OFFSET_DAC,   .blue = AFE_OFFSET_DAC, .negative = AFE_RLC_DAC_NEG}, \
+                    .gain = { .red = DIGITAL_GAIN_DEFAULT, .green = DIGITAL_GAIN_DEFAULT, .blue = DIGITAL_GAIN_DEFAULT}, \
+                    .offset = { .red = DIGITAL_OFFSET_DEFAULT, .green = DIGITAL_OFFSET_DEFAULT,   .blue = DIGITAL_OFFSET_DEFAULT, .negative = DIGITAL_NEG_OFFSET_DEFAULT}, \
                     .v_front_porch = V_FRONT_PORCH, .v_back_porch = V_BACK_PORCH, \
                     .h_front_porch = HSYNC_FRONT_PORCH, .h_back_porch = HSYNC_BACK_PORCH, \
                     .refresh_rate = REFRESH_RATE, \
                     .fine_tune = 0 \
                 }, { \
-                    .gain = { .red = AFE_PGA_GAIN_RGB_SOG, .green = AFE_PGA_GAIN_RGB_SOG, .blue = AFE_PGA_GAIN_RGB_SOG}, \
-                    .offset = { .red = AFE_OFFSET_DAC_SOG_RED, .green = AFE_OFFSET_DAC_SOG_GREEN, .blue = AFE_OFFSET_DAC_SOG_BLUE, .negative = AFE_RLC_DAC_NEG}, \
+                    .gain = { .red = DIGITAL_GAIN_DEFAULT, .green = DIGITAL_GAIN_DEFAULT, .blue = DIGITAL_GAIN_DEFAULT}, \
+                    .offset = { .red = DIGITAL_OFFSET_DEFAULT, .green = DIGITAL_OFFSET_DEFAULT, .blue = DIGITAL_OFFSET_DEFAULT, .negative = DIGITAL_NEG_OFFSET_DEFAULT}, \
                     .v_front_porch = V_FRONT_PORCH, .v_back_porch = V_BACK_PORCH, \
                     .h_front_porch = HSYNC_FRONT_PORCH, .h_back_porch = HSYNC_BACK_PORCH, \
                     .refresh_rate = REFRESH_RATE, \
